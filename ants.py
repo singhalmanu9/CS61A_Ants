@@ -42,8 +42,13 @@ class Place(object):
             else:
                 # Phase 4: Special handling for BodyguardAnt
                 # BEGIN Problem 7
-                "*** REPLACE THIS LINE ***"
-                assert self.ant is None, 'Two ants in {0}'.format(self)
+                if self.ant.can_contain(insect):
+                    self.ant.contain_ant(insect)
+                elif insect.can_contain(self.ant):
+                    insect.contain_ant(self.ant)
+                    self.ant = insect
+                else:
+                    assert self.ant is None, 'Two ants in {0}'.format(self)
                 # END Problem 7
         else:
             self.bees.append(insect)
@@ -60,8 +65,8 @@ class Place(object):
         A Bee is just removed from the list of Bees.
         """
 
-        if insect.name == 'Queen':
-            return None
+        # if insect.name == 'Queen':
+        #     return None
 
         if insect.is_ant:
             # Phase 4: Special Handling for BodyguardAnt and QueenAnt
@@ -163,11 +168,14 @@ class Ant(Insect):
     implemented = False  # Only implemented Ant classes should be instantiated
     food_cost = 0
     blocks_path = True
+    container = False
 
     def __init__(self, armor=1):
         """Create an Ant with an ARMOR quantity."""
         Insect.__init__(self, armor)
 
+    def can_contain(self, other):
+        return self.container and self.ant == None and not other.container
 
 class HarvesterAnt(Ant):
     """HarvesterAnt produces 1 additional food per turn for the colony."""
@@ -258,7 +266,7 @@ class FireAnt(Ant):
     damage = 3
     # BEGIN Problem 4A
     food_cost = 5
-    implemented = False   # Change to True to view in the GUI
+    implemented = True   # Change to True to view in the GUI
     # END Problem 4A
 
     def reduce_armor(self, amount):
@@ -317,7 +325,7 @@ class NinjaAnt(Ant):
     # BEGIN Problem 6A
     food_cost = 5
     blocks_path = False
-    implemented = False   # Change to True to view in the GUI
+    implemented = True   # Change to True to view in the GUI
     # END Problem 6A
 
     def action(self, colony):
@@ -365,14 +373,13 @@ class HungryAnt(Ant):
             self.digesting -= 1
 
 
-
-
 class BodyguardAnt(Ant):
     """BodyguardAnt provides protection to other Ants."""
     name = 'Bodyguard'
     # BEGIN Problem 7
-    "*** REPLACE THIS LINE ***"
-    implemented = False   # Change to True to view in the GUI
+    container = True
+    implemented = True   # Change to True to view in the GUI
+    food_cost = 4
     # END Problem 7
 
     def __init__(self):
@@ -381,12 +388,13 @@ class BodyguardAnt(Ant):
 
     def contain_ant(self, ant):
         # BEGIN Problem 7
-        "*** REPLACE THIS LINE ***"
+        self.ant = ant
         # END Problem 7
 
     def action(self, colony):
         # BEGIN Problem 7
-        "*** REPLACE THIS LINE ***"
+        if self.ant is not None:
+            self.ant.action(colony)
         # END Problem 7
 
 class TankAnt(BodyguardAnt):
@@ -394,13 +402,21 @@ class TankAnt(BodyguardAnt):
     name = 'Tank'
     damage = 1
     # BEGIN Problem 8
-    "*** REPLACE THIS LINE ***"
-    implemented = False   # Change to True to view in the GUI
+    food_cost = 6
+    implemented = True   # Change to True to view in the GUI
     # END Problem 8
+
+    def __init__(self):
+        BodyguardAnt.__init__(self)
 
     def action(self, colony):
         # BEGIN Problem 8
-        "*** REPLACE THIS LINE ***"
+        if self.ant is not None:
+            self.ant.action(colony)
+
+        copy = self.place.bees[:]
+        for i in range(len(self.place.bees)):
+            copy[i].reduce_armor(self.damage)
         # END Problem 8
 
 class QueenAnt(ScubaThrower):  # You should change this line
