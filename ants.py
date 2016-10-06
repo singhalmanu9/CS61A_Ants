@@ -139,7 +139,7 @@ class Bee(Insect):
         # Phase 3: Special handling for NinjaAnt
         # BEGIN Problem 6A
         "*** REPLACE THIS LINE ***"
-        return self.place.ant is not None
+        return self.place.ant is not None and self.place.ant.blocks_path
         # END Problem 6A
 
     def action(self, colony):
@@ -160,6 +160,7 @@ class Ant(Insect):
     is_ant = True
     implemented = False  # Only implemented Ant classes should be instantiated
     food_cost = 0
+    blocks_path = True
 
     def __init__(self, armor=1):
         """Create an Ant with an ARMOR quantity."""
@@ -250,9 +251,11 @@ class FireAnt(Ant):
         the current place.
         """
         # BEGIN Problem 4A
-        if amount > self.armor:
-            self.place.bees = [bee.reduce_armor(self.damage) for bee in self.place.bees[:]]
-            
+        if amount >= self.armor:
+            copy = self.place.bees[:]
+            for i in range(len(self.place.bees)):
+                copy[i].reduce_armor(self.damage)
+
         Ant.reduce_armor(self, amount)
         # END Problem 4A
 
@@ -278,7 +281,18 @@ class ShortThrower(ThrowerAnt):
 
 
 # BEGIN Problem 5A
-"*** REPLACE THIS LINE ***"
+class WallAnt(Ant):
+
+    name = "Wall"
+    food_cost = 4
+    implemented = True
+
+    def __init__(self):
+        self.armor = 4
+
+    def action(self, colony):
+        pass
+
 # The WallAnt class
 # END Problem 5A
 
@@ -289,13 +303,16 @@ class NinjaAnt(Ant):
     name = 'Ninja'
     damage = 1
     # BEGIN Problem 6A
-    "*** REPLACE THIS LINE ***"
+    food_cost = 5
+    blocks_path = False
     implemented = False   # Change to True to view in the GUI
     # END Problem 6A
 
     def action(self, colony):
         # BEGIN Problem 6A
-        "*** REPLACE THIS LINE ***"
+        copy = self.place.bees[:]
+        for i in range(len(self.place.bees)):
+            copy[i].reduce_armor(self.damage)
         # END Problem 6A
 
 
